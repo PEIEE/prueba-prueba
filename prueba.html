@@ -1,0 +1,349 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>¡Tu Perfil Supercell! - CoC, CR & BS</title>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&family=Bungee&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { 
+            font-family: 'Roboto', sans-serif; 
+            background: linear-gradient(135deg, #ff6b35 0%, #f7931e 100%); 
+            min-height: 100vh; 
+            padding: 20px; 
+            color: #333;
+        }
+        .container { max-width: 800px; margin: 0 auto; background: rgba(255,255,255,0.95); border-radius: 20px; padding: 30px; box-shadow: 0 10px 30px rgba(0,0,0,0.2); }
+        h1 { 
+            text-align: center; 
+            font-family: 'Bungee', cursive; 
+            color: #d32f2f; 
+            margin-bottom: 10px; 
+            font-size: 2.5em; 
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.1);
+        }
+        .subtitle { text-align: center; color: #666; margin-bottom: 30px; font-size: 1.1em; }
+        #selectedGameIcon { 
+            text-align: center; margin-bottom: 20px; 
+            transition: all 0.3s ease;
+        }
+        #selectedGameIcon.hidden { opacity: 0; transform: scale(0.8); }
+        #gameLogo { 
+            width: 120px; height: auto; max-width: 100%; 
+            border-radius: 10px; box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+        }
+        #gameName { font-size: 1.2em; margin-top: 10px; color: #d32f2f; font-weight: bold; }
+        label { 
+            display: block; margin-top: 20px; 
+            font-weight: bold; color: #d32f2f; 
+            font-size: 1.1em;
+        }
+        select, input { 
+            width: 100%; padding: 15px; margin: 10px 0; 
+            border: 2px solid #f7931e; border-radius: 10px; 
+            font-size: 1em; transition: border-color 0.3s;
+        }
+        select:focus, input:focus { outline: none; border-color: #d32f2f; }
+        button { 
+            width: 100%; padding: 15px; margin: 20px 0; 
+            background: linear-gradient(135deg, #d32f2f, #f7931e); 
+            color: white; border: none; border-radius: 10px; 
+            font-size: 1.2em; font-weight: bold; cursor: pointer; 
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        button:hover { transform: translateY(-2px); box-shadow: 0 5px 15px rgba(211,47,47,0.4); }
+        button:active { transform: translateY(0); }
+        #result { 
+            margin-top: 20px; padding: 20px; 
+            background: white; border-radius: 15px; 
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1); 
+            max-height: 600px; overflow-y: auto;
+        }
+        .key-info { 
+            background: linear-gradient(135deg, #e3f2fd, #bbdefb); 
+            padding: 20px; margin: 15px 0; 
+            border-radius: 10px; border-left: 5px solid #2196F3;
+            font-size: 1.1em;
+        }
+        .key-info strong { color: #1976d2; }
+        .stats-section { 
+            margin: 15px 0; padding: 15px; 
+            background: #f9f9f9; border-radius: 8px; 
+            border-left: 4px solid #f7931e;
+        }
+        .stats-section h3 { color: #d32f2f; margin-bottom: 10px; }
+        .stats-list { list-style: none; }
+        .stats-list li { 
+            padding: 8px; margin: 5px 0; 
+            background: white; border-radius: 5px; 
+            display: flex; justify-content: space-between; align-items: center;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+        .stats-table { width: 100%; border-collapse: collapse; margin-top: 10px; }
+        .stats-table th, .stats-table td { padding: 8px; text-align: left; border-bottom: 1px solid #ddd; }
+        .stats-table th { background: #f7931e; color: white; }
+        .error { 
+            color: #d32f2f; background: #ffebee; 
+            padding: 15px; border-radius: 10px; 
+            border-left: 5px solid #d32f2f; 
+            text-align: center; font-weight: bold;
+        }
+        .loading { 
+            text-align: center; color: #ff9800; 
+            font-size: 1.1em; display: none;
+        }
+        .spinner { 
+            border: 4px solid #f3f3f3; border-top: 4px solid #d32f2f; 
+            border-radius: 50%; width: 30px; height: 30px; 
+            animation: spin 1s linear infinite; margin: 0 auto 10px;
+        }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+        .game-icon { 
+            font-size: 1.5em; margin-right: 10px; 
+            color: #d32f2f;
+        }
+        .result-logo { width: 60px; height: auto; vertical-align: middle; margin-right: 10px; }
+        details { margin-top: 20px; }
+        summary { cursor: pointer; font-weight: bold; color: #666; padding: 10px; background: #f5f5f5; border-radius: 5px; }
+        pre { background: #f8f8f8; padding: 15px; border-radius: 5px; overflow-x: auto; font-size: 0.9em; }
+        @media (max-width: 600px) { 
+            .container { padding: 20px; } 
+            h1 { font-size: 2em; }
+            #gameLogo { width: 100px; }
+            .result-logo { width: 50px; }
+            .stats-table { font-size: 0.9em; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1><i class="fas fa-crown game-icon"></i>¡Tu Perfil Supercell!</h1>
+        <p class="subtitle">Descubre tus stats en Clash of Clans, Royale o Brawl Stars. ¡Solo ingresa tu tag!</p>
+        
+        <!-- Icono dinámico con logo -->
+        <div id="selectedGameIcon" class="hidden">
+            <img id="gameLogo" src="" alt="Logo del juego" />
+            <p id="gameName"></p>
+        </div>
+        
+        <label for="game"><i class="fas fa-gamepad game-icon"></i>Elige tu juego:</label>
+        <select id="game" onchange="updateSelectedIcon()">
+            <option value="coc">🏠 Clash of Clans</option>
+            <option value="cr">👑 Clash Royale</option>
+            <option value="bs">⭐ Brawl Stars</option>
+        </select>
+        
+        <label for="playerTag"><i class="fas fa-user"></i>Tu Tag de Jugador:</label>
+        <input type="text" id="playerTag" placeholder="Ej: #ABC123 (CoC/CR) o 8PL0Y2P8 (BS)" maxlength="15">
+        
+        <button onclick="fetchPlayer()">
+            <i class="fas fa-search"></i> ¡Obtener mi Perfil!
+        </button>
+        
+        <p id="loading" class="loading">
+            <div class="spinner"></div>
+            Cargando tu gloria... ¡Un momento!
+        </p>
+        
+        <div id="result"></div>
+    </div>
+
+    <script>
+        const BACKEND_URL = 'http://localhost:3000'; // Cambia por tu URL de backend
+        
+        // URLs de logos oficiales
+        const gameLogos = {
+            coc: 'https://upload.wikimedia.org/wikipedia/en/5/59/Clash_of_Clans_Logo.png',
+            cr: 'https://upload.wikimedia.org/wikipedia/en/b/b8/Clash_Royale_game_logo.png',
+            bs: 'https://upload.wikimedia.org/wikipedia/commons/thumb/2/2e/Brawl_Stars_Logo.svg/800px-Brawl_Stars_Logo.svg.png'
+        };
+        
+        // Función para actualizar el logo del juego seleccionado
+        function updateSelectedIcon() {
+            const game = document.getElementById('game').value;
+            const iconDiv = document.getElementById('selectedGameIcon');
+            const logoElem = document.getElementById('gameLogo');
+            const nameElem = document.getElementById('gameName');
+            
+            let gameName = '';
+            
+            if (game === 'coc') {
+                gameName = 'Clash of Clans';
+            } else if (game === 'cr') {
+                gameName = 'Clash Royale';
+            } else if (game === 'bs') {
+                gameName = 'Brawl Stars';
+            }
+            
+            logoElem.src = gameLogos[game];
+            nameElem.textContent = gameName;
+            iconDiv.classList.remove('hidden');
+        }
+
+        async function fetchPlayer() {
+            const game = document.getElementById('game').value;
+            const playerTag = document.getElementById('playerTag').value.trim();
+            const resultDiv = document.getElementById('result');
+            const loading = document.getElementById('loading');
+            
+            if (!playerTag) {
+                resultDiv.innerHTML = '<p class="error"><i class="fas fa-exclamation-triangle"></i> ¡Ingresa tu tag para la batalla!</p>';
+                return;
+            }
+            
+            loading.style.display = 'block';
+            resultDiv.innerHTML = '';
+            
+            try {
+                const response = await fetch(`${BACKEND_URL}/player`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ game, playerTag })
+                });
+                
+                loading.style.display = 'none';
+                
+                if (!response.ok) {
+                    const error = await response.json();
+                    throw new Error(error.error || '¡Error en la arena! Intenta de nuevo.');
+                }
+                
+                const data = await response.json();
+                displayPlayerData(data, game);
+            } catch (error) {
+                loading.style.display = 'none';
+                resultDiv.innerHTML = `<p class="error"><i class="fas fa-skull"></i> ${error.message}</p>`;
+            }
+        }
+        
+        function displayPlayerData(data, game) {
+            const resultDiv = document.getElementById('result');
+            let gameTitle = '';
+            let logoHtml = `<img src="${gameLogos[game]}" alt="Logo ${game}" class="result-logo" />`;
+            
+            if (game === 'coc') {
+                gameTitle = 'Clash of Clans';
+            } else if (game === 'cr') {
+                gameTitle = 'Clash Royale';
+            } else if (game === 'bs') {
+                gameTitle = 'Brawl Stars';
+            }
+            
+            let html = `
+                <h2 style="color: #d32f2f; text-align: center;">${logoHtml}¡Tu perfil en ${gameTitle}!</h2>
+            `;
+            
+            // Info clave básica
+            if (game === 'coc') {
+                html += `
+                    <div class="key-info">
+                        <strong><i class="fas fa-user"></i> Nombre:</strong> ${data.name || 'N/A'}<br>
+                        <strong><i class="fas fa-university"></i> Ayuntamiento:</strong> Nivel ${data.townHallLevel || 'N/A'}<br>
+                        <strong><i class="fas fa-trophy"></i> Trofeos:</strong> ${data.trophies || 0}<br>
+                        <strong><i class="fas fa-users"></i> Clan:</strong> ${data.clan ? data.clan.name : 'Sin clan'} (${data.clan ? data.clan.tag : ''})
+                    </div>
+                `;
+            } else if (game === 'cr') {
+                html += `
+                    <div class="key-info">
+                        <strong><i class="fas fa-user"></i> Nombre:</strong> ${data.name || 'N/A'}<br>
+                        <strong><i class="fas fa-tower-observation"></i> Torre del Rey:</strong> Nivel ${data.kingTowerLevel || 'N/A'}<br>
+                        <strong><i class="fas fa-trophy"></i> Trofeos:</strong> ${data.trophies || 0}<br>
+                        <strong><i class="fas fa-users"></i> Clan:</strong> ${data.clan ? data.clan.name : 'Sin clan'} (${data.clan ? data.clan.tag : ''})
+                    </div>
+                `;
+            } else if (game === 'bs') {
+                html += `
+                    <div class="key-info">
+                        <strong><i class="fas fa-user"></i> Nombre:</strong> ${data.name || 'N/A'}<br>
+                        <strong><i class="fas fa-star"></i> Trofeos:</strong> ${data.trophies || 0}<br>
+                        <strong><i class="fas fa-star-half-alt"></i> Máx. Trofeos:</strong> ${data.highestTrophies || 0}<br>
+                        <strong><i class="fas fa-users"></i> Club:</strong> ${data.club ? data.club.name : 'Sin club'} (${data.club ? data.club.tag : ''})
+                    </div>
+                `;
+            }
+            
+            // Stats detallados por juego
+            if (game === 'coc') {
+                // Héroes
+                if (data.heroes && data.heroes.length > 0) {
+                    html += `
+                        <div class="stats-section">
+                            <h3><i class="fas fa-dragon"></i> Héroes de tu Aldea Principal</h3>
+                            <table class="stats-table">
+                                <thead><tr><th>Héroe</th><th>Nivel</th><th>Máx. Nivel</th></tr></thead>
+                                <tbody>
+                    `;
+                    data.heroes.forEach(hero => {
+                        html += `<tr><td>${hero.name}</td><td>${hero.level}</td><td>${hero.maxLevel}</td></tr>`;
+                    });
+                    html += `</tbody></table></div>`;
+                }
+                
+                // Tropas (solo Home Village)
+                if (data.troops && data.troops.length > 0) {
+                    const homeTroops = data.troops.filter(t => t.village === 'home');
+                    if (homeTroops.length > 0) {
+                        html += `
+                            <div class="stats-section">
+                                <h3><i class="fas fa-sword"></i> Tropas Desbloqueadas (Aldea Principal)</h3>
+                                <ul class="stats-list">
+                        `;
+                        homeTroops.forEach(troop => {
+                            html += `<li><span>${troop.name}</span><span>Nivel ${troop.level} / ${troop.maxLevel}</span></li>`;
+                        });
+                        html += `</ul></div>`;
+                    }
+                }
+            } else if (game === 'cr') {
+                // Cartas
+                if (data.cards && data.cards.length > 0) {
+                    const unlockedCards = data.cards.filter(card => card.level > 0);
+                    if (unlockedCards.length > 0) {
+                        html += `
+                            <div class="stats-section">
+                                <h3><i class="fas fa-gem"></i> Cartas Desbloqueadas</h3>
+                                <table class="stats-table">
+                                    <thead><tr><th>Carta</th><th>Nivel</th><th>Máx. Nivel</th></tr></thead>
+                                    <tbody>
+                        `;
+                        unlockedCards.forEach(card => {
+                            html += `<tr><td>${card.name}</td><td>${card.level}</td><td>${card.maxLevel}</td></tr>`;
+                        });
+                        html += `</tbody></table></div>`;
+                    }
+                }
+            } else if (game === 'bs') {
+                // Brawlers
+                if (data.brawlers && data.brawlers.length > 0) {
+                    html += `
+                        <div class="stats-section">
+                            <h3><i class="fas fa-fist-raised"></i> Tus Brawlers</h3>
+                            <table class="stats-table">
+                                <thead><tr><th>Brawler</th><th>Poder</th><th>Nivel</th><th>Trofeos</th><th>Máx. Trofeos</th></tr></thead>
+                                <tbody>
+                    `;
+                    data.brawlers.forEach(brawler => {
+                        html += `<tr><td>${brawler.name}</td><td>${brawler.power}</td><td>${brawler.level}</td><td>${brawler.trophies}</td><td>${brawler.highestTrophies}</td></tr>`;
+                    });
+                    html += `</tbody></table></div>`;
+                }
+            }
+            
+            html += `<details><summary style="cursor: pointer;"><i class="fas fa-code"></i> Ver datos completos (JSON)</summary><pre>${JSON.stringify(data, null, 2)}</pre></details>`;
+            
+            resultDiv.innerHTML = html;
+        }
+        
+        // Buscar con Enter
+        document.getElementById('playerTag').addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') fetchPlayer();
+        });
+        
+        // Inicializar logo al cargar
+        updateSelectedIcon();
+    </script>
+</body>
+</html>
