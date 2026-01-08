@@ -61,7 +61,7 @@
             animation: spin 1s linear infinite; margin: 0 auto 10px;
         }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
-        pre { background: #f8f8f8; padding: 10px; font-size: 0.8em; overflow-x: auto; }
+        pre { background: #f8f8f8; padding: 10px; font-size: 0.8em; overflow-x: auto; margin-top: 10px;}
     </style>
 </head>
 <body>
@@ -90,15 +90,15 @@
         
         <div id="loading" class="loading">
             <div class="spinner"></div>
-            <p>Consultando servidores de Supercell...</p>
+            <p>Conectando con la función de Netlify...</p>
         </div>
         
         <div id="result"></div>
     </div>
 
     <script>
-        // RUTA ACTUALIZADA PARA NETLIFY TOML
-        const API_URL = '/api/get-player';
+        // URL ACTUALIZADA SEGÚN TU PANEL DE NETLIFY
+        const API_URL = 'https://scstats.netlify.app/.netlify/functions/get-player';
         
         const gameLogos = {
             coc: 'https://upload.wikimedia.org/wikipedia/en/5/59/Clash_of_Clans_Logo.png',
@@ -135,31 +135,38 @@
                 loading.style.display = 'none';
                 resultDiv.style.display = 'block';
 
-                if (!response.ok) throw new Error(data.error || 'Error en la búsqueda');
+                if (!response.ok) {
+                    throw new Error(data.error || 'No se encontró el jugador o error de API');
+                }
                 
                 renderData(data, game);
             } catch (error) {
                 loading.style.display = 'none';
                 resultDiv.style.display = 'block';
-                resultDiv.innerHTML = `<p class="error"><b>Error:</b> ${error.message}</p>`;
+                resultDiv.innerHTML = `
+                    <div class="error">
+                        <p><b>¡Error!</b></p>
+                        <p>${error.message}</p>
+                        <p style="font-size: 0.8em; margin-top: 10px;">Revisa que las API Keys estén configuradas en Netlify.</p>
+                    </div>`;
             }
         }
         
         function renderData(data, game) {
             const resultDiv = document.getElementById('result');
-            let html = `<h2>${data.name}</h2>`;
+            let html = `<h2 style="text-align: center; color: #d32f2f;">${data.name}</h2>`;
             html += `<div class="key-info">`;
             
             if (game === 'coc') {
-                html += `Town Hall: ${data.townHallLevel}<br>Trofeos: ${data.trophies}`;
+                html += `<strong>Ayuntamiento:</strong> Nivel ${data.townHallLevel}<br><strong>Trofeos:</strong> ${data.trophies}`;
             } else if (game === 'cr') {
-                html += `Nivel: ${data.expLevel}<br>Trofeos: ${data.trophies}`;
+                html += `<strong>Nivel:</strong> ${data.expLevel}<br><strong>Trofeos:</strong> ${data.trophies}`;
             } else if (game === 'bs') {
-                html += `Trofeos: ${data.trophies}<br>Máximo: ${data.highestTrophies}`;
+                html += `<strong>Trofeos:</strong> ${data.trophies}<br><strong>Récord Máximo:</strong> ${data.highestTrophies}`;
             }
             
             html += `</div>`;
-            html += `<details><summary>Datos Técnicos (JSON)</summary><pre>${JSON.stringify(data, null, 2)}</pre></details>`;
+            html += `<details><summary style="cursor:pointer; color:#666;">Ver JSON completo</summary><pre>${JSON.stringify(data, null, 2)}</pre></details>`;
             resultDiv.innerHTML = html;
         }
 
